@@ -1,0 +1,77 @@
+{
+  "name": "paypay-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for PayPay (Japan's largest QR wallet). Bilingual (JP/EN) tools for creating QR codes, accepting payments, refunds, and cancellations via the PayPay Open Payment API.",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "modelcontextprotocol",
+    "paypay",
+    "paypay-opa",
+    "payment",
+    "payments",
+    "qr-code",
+    "japan",
+    "japanese",
+    "claude",
+    "claude-desktop",
+    "claude-code",
+    "cursor",
+    "windsurf",
+    "anthropic",
+    "llm",
+    "ai-agent",
+    "agentic-commerce",
+    "opa"
+  ],
+  "author": {
+    "name": "mrslbt",
+    "url": "https://github.com/mrslbt"
+  },
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "paypay-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
+    "start": "node --env-file-if-exists=.env dist/index.js",
+    "start:http": "MCP_TRANSPORT=http node --env-file-if-exists=.env dist/index.js",
+    "smoke": "node --env-file-if-exists=.env tests/smoke.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "qrcode": "^1.5.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/qrcode": "^1.5.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrslbt/paypay-mcp.git"
+  },
+  "homepage": "https://github.com/mrslbt/paypay-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/mrslbt/paypay-mcp/issues"
+  }
+}

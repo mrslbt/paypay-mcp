@@ -1,0 +1,38 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required:
+      - paypayApiKey
+      - paypayApiSecret
+      - paypayMerchantId
+    properties:
+      paypayApiKey:
+        type: string
+        title: PayPay API Key
+        description: OPA API Key ID from the PayPay Developer Dashboard.
+      paypayApiSecret:
+        type: string
+        title: PayPay API Secret
+        description: OPA API Key Secret. Keep this private.
+      paypayMerchantId:
+        type: string
+        title: PayPay Merchant ID
+        description: Merchant ID from the PayPay Developer Dashboard.
+      paypayEnv:
+        type: string
+        title: Environment
+        enum: [sandbox, production]
+        default: sandbox
+        description: Which PayPay environment to hit. Start with sandbox.
+  commandFunction: |-
+    (config) => ({
+      command: "npx",
+      args: ["-y", "paypay-mcp"],
+      env: {
+        PAYPAY_API_KEY: config.paypayApiKey,
+        PAYPAY_API_SECRET: config.paypayApiSecret,
+        PAYPAY_MERCHANT_ID: config.paypayMerchantId,
+        PAYPAY_ENV: config.paypayEnv || "sandbox"
+      }
+    })
