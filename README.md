@@ -19,7 +19,22 @@ Works with Claude Desktop, Claude Code, Cursor, Windsurf, Zed, ChatGPT Apps SDK,
 
 `accept_single_payment`, `refund_last_payment`, `debug_stuck_payment`.
 
+## Resources
+
+| URI | Description |
+|---|---|
+| `paypay://docs/opa-reference` | Endpoint map, auth scheme, and status vocabulary for the PayPay OPA API. |
+| `paypay://docs/payment-states` | Payment lifecycle and the cancel-vs-refund decision rule. |
+| `paypay://config/current` | Non-secret view of the active config (env, merchantId, baseUrl, transport). |
+
 ## Install
+
+One-click:
+
+[![Install in Cursor](https://img.shields.io/badge/Install-Cursor-0A0A0A?logo=cursor)](cursor://anysphere.cursor-deeplink/mcp/install?name=paypay&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsInBheXBheS1tY3AiXX0=)
+[![Install in VS Code](https://img.shields.io/badge/Install-VS_Code-007ACC?logo=visualstudiocode)](https://insiders.vscode.dev/redirect/mcp/install?name=paypay&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22paypay-mcp%22%5D%7D)
+
+Or via npm:
 
 ```bash
 npm install -g paypay-mcp
@@ -120,6 +135,10 @@ v0.2: PreAuth + Capture, ContinuousPayments, DirectDebit, AccountLink QR, webhoo
 
 v0.3: Native Payment (App Invoke + user JWT auth), Visa-partnership endpoints, OpenTelemetry tracing.
 
+## Disclaimer
+
+This is an unofficial MCP server. Not affiliated with or endorsed by PayPay Corporation.
+
 ## License
 
-[MIT](LICENSE). Not affiliated with PayPay Corporation.
+[MIT](LICENSE)
