@@ -9,6 +9,7 @@ import type { Config } from "./config.js";
 import { PayPayError } from "./errors.js";
 import { logger } from "./logger.js";
 import { prompts } from "./prompts/index.js";
+import { resources } from "./resources/index.js";
 import { tools } from "./tools/index.js";
 
 export function buildServer(config: Config): McpServer {
@@ -23,6 +24,7 @@ export function buildServer(config: Config): McpServer {
       capabilities: {
         tools: {},
         prompts: {},
+        resources: {},
       },
     },
   );
@@ -94,6 +96,27 @@ export function buildServer(config: Config): McpServer {
           {
             role: "user" as const,
             content: { type: "text" as const, text: prompt.text },
+          },
+        ],
+      }),
+    );
+  }
+
+  for (const resource of resources) {
+    server.registerResource(
+      resource.name,
+      resource.uri,
+      {
+        title: resource.title,
+        description: resource.description,
+        mimeType: resource.mimeType,
+      },
+      async (uri: URL) => ({
+        contents: [
+          {
+            uri: uri.href,
+            mimeType: resource.mimeType,
+            text: resource.read(config),
           },
         ],
       }),

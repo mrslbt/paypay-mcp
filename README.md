@@ -1,5 +1,7 @@
 # paypay-mcp
 
+[![MCP Badge](https://lobehub.com/badge/mcp/mrslbt-paypay-mcp)](https://lobehub.com/mcp/mrslbt-paypay-mcp)
+
 Model Context Protocol server for the [PayPay Open Payment API](https://www.paypay.ne.jp/opa/doc/v1.0/).
 
 Works with Claude Desktop, Claude Code, Cursor, Windsurf, Zed, ChatGPT Apps SDK, and any other MCP-compatible client. Tool descriptions are provided in English and Japanese.
