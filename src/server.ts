@@ -8,17 +8,19 @@ import { PayPayClient } from "./client.js";
 import type { Config } from "./config.js";
 import { PayPayError } from "./errors.js";
 import { logger } from "./logger.js";
-import { prompts } from "./prompts/index.js";
+import { getPrompts } from "./prompts/index.js";
 import { resources } from "./resources/index.js";
-import { tools } from "./tools/index.js";
+import { getTools } from "./tools/index.js";
 
 export function buildServer(config: Config): McpServer {
   const client = new PayPayClient(config);
+  const tools = getTools(config);
+  const prompts = getPrompts(config);
 
   const server = new McpServer(
     {
       name: "paypay-mcp",
-      version: "0.1.0",
+      version: "0.1.1",
     },
     {
       capabilities: {

@@ -19,6 +19,10 @@ export interface Config {
   httpAuthToken?: string;
   /** Comma-separated allowlist of CORS origins. Defaults to empty (no cross-origin). */
   httpAllowedOrigins: string[];
+  /** Whether refund_payment is exposed as a tool. Defaults to false. */
+  enableRefunds: boolean;
+  /** Whether cancel_payment is exposed as a tool. Defaults to false. */
+  enableCancels: boolean;
 }
 
 const SANDBOX_BASE_URL = "https://apigw.sandbox.paypay.ne.jp";
@@ -67,5 +71,7 @@ export function loadConfig(): Config {
     httpHost: process.env.MCP_HTTP_HOST?.trim() || "127.0.0.1",
     httpAuthToken: process.env.MCP_AUTH_TOKEN?.trim() || undefined,
     httpAllowedOrigins,
+    enableRefunds: process.env.PAYPAY_ENABLE_REFUNDS === "true",
+    enableCancels: process.env.PAYPAY_ENABLE_CANCELS === "true",
   };
 }

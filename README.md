@@ -14,8 +14,8 @@ Works with Claude Desktop, Claude Code, Cursor, Windsurf, Zed, ChatGPT Apps SDK,
 | `get_payment_details` | Fetch the current status of a payment. |
 | `wait_for_payment` | Poll until a payment reaches a terminal state. |
 | `delete_qr_code` | Invalidate a QR code before payment. |
-| `refund_payment` | Full or partial refund. |
-| `cancel_payment` | Cancel a payment when its state is unclear (timeout or error). |
+| `refund_payment` | Full or partial refund. **Disabled unless `PAYPAY_ENABLE_REFUNDS=true`.** |
+| `cancel_payment` | Cancel a payment when its state is unclear (timeout or error). **Disabled unless `PAYPAY_ENABLE_CANCELS=true`.** |
 
 ## Prompts
 
@@ -52,6 +52,8 @@ Credentials come from the [PayPay Developer Dashboard](https://developer.paypay.
 | `PAYPAY_API_SECRET` | yes | OPA API Key Secret |
 | `PAYPAY_MERCHANT_ID` | yes | Merchant ID |
 | `PAYPAY_ENV` | no | `sandbox` (default) or `production` |
+| `PAYPAY_ENABLE_REFUNDS` | no | Set to `true` to expose `refund_payment`. Disabled by default. |
+| `PAYPAY_ENABLE_CANCELS` | no | Set to `true` to expose `cancel_payment`. Disabled by default. |
 | `MCP_TRANSPORT` | no | `stdio` (default) or `http` |
 | `MCP_HTTP_PORT` | no | Port when `MCP_TRANSPORT=http`. Default `3000`. |
 | `MCP_HTTP_HOST` | no | Bind address. Default `127.0.0.1`. Public binds require `MCP_AUTH_TOKEN`. |
@@ -137,9 +139,19 @@ v0.2: PreAuth + Capture, ContinuousPayments, DirectDebit, AccountLink QR, webhoo
 
 v0.3: Native Payment (App Invoke + user JWT auth), Visa-partnership endpoints, OpenTelemetry tracing.
 
+## Safety
+
+This server can move real money through the PayPay OPA API. Key safeguards:
+
+- **Refund and cancel tools are disabled by default.** `refund_payment` and `cancel_payment` are only registered when `PAYPAY_ENABLE_REFUNDS=true` or `PAYPAY_ENABLE_CANCELS=true`. Only enable them in trusted agent contexts where tool inputs cannot be influenced by untrusted content.
+- **Sandbox is the default.** Production requires an explicit `PAYPAY_ENV=production`, plus completed PayPay merchant onboarding. Always test against sandbox first.
+- **Unique merchantPaymentId and merchantRefundId per call.** PayPay deduplicates by these IDs, so reusing one will either fail or target an older payment. Generate a fresh ID for each new payment or refund.
+
+Even with these gates on, review any money-moving request before approving the tool call. Treat tool inputs derived from model output as untrusted.
+
 ## Disclaimer
 
-This is an unofficial MCP server. Not affiliated with or endorsed by PayPay Corporation.
+This is an unofficial, community-built MCP server. Not affiliated with, endorsed by, or sponsored by PayPay Corporation. PayPay is a registered trademark of its respective owners. Use at your own risk. The author accepts no liability for funds lost through misuse, prompt injection, or bugs.
 
 ## License
 
