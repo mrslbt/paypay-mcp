@@ -6,6 +6,12 @@ Model Context Protocol server for the [PayPay Open Payment API](https://www.payp
 
 Works with Claude Desktop, Claude Code, Cursor, Windsurf, Zed, ChatGPT Apps SDK, and any other MCP-compatible client. Tool descriptions are provided in English and Japanese.
 
+## Status
+
+`v0.1.x` — production-capable, not yet battle-tested at scale.
+
+The server runs cleanly against PayPay's production Open Payment API once `PAYPAY_ENV=production` is set with approved merchant credentials. It has not yet processed meaningful real-world volume. If you are routing real payments through it, pin the version and review the source first.
+
 ## Tools
 
 | Tool | Description |
