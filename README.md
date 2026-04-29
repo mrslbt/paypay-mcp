@@ -1,6 +1,9 @@
 # paypay-mcp
 
+[![npm version](https://img.shields.io/npm/v/paypay-mcp.svg)](https://www.npmjs.com/package/paypay-mcp)
+[![npm downloads](https://img.shields.io/npm/dm/paypay-mcp.svg)](https://www.npmjs.com/package/paypay-mcp)
 [![MCP Badge](https://lobehub.com/badge/mcp/mrslbt-paypay-mcp)](https://lobehub.com/mcp/mrslbt-paypay-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Model Context Protocol server for the [PayPay Open Payment API](https://www.paypay.ne.jp/opa/doc/v1.0/).
 
