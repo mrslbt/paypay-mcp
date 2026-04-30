@@ -52,6 +52,7 @@
     "smoke": "node --env-file-if-exists=.env tests/smoke.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "npm run build && node --env-file-if-exists=.env tests/mcp_e2e.mjs",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build"
   },

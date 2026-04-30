@@ -35,22 +35,33 @@ console.log("[e2e] connecting to server over stdio…");
 await client.connect(transport);
 ok("connected");
 
-// 1. List tools
+// 1. List tools — refund_payment and cancel_payment are gated behind
+// PAYPAY_ENABLE_REFUNDS / PAYPAY_ENABLE_CANCELS for safety, so we
+// only expect them when those flags are on.
 const toolsResp = await client.listTools();
 const toolNames = toolsResp.tools.map((t) => t.name).sort();
 console.log(`[e2e] tools: ${toolNames.join(", ")}`);
+
 const expectedTools = [
-  "cancel_payment",
   "create_qr_code",
   "delete_qr_code",
   "get_payment_details",
-  "refund_payment",
   "wait_for_payment",
 ];
+if (process.env.PAYPAY_ENABLE_REFUNDS === "true") expectedTools.push("refund_payment");
+if (process.env.PAYPAY_ENABLE_CANCELS === "true") expectedTools.push("cancel_payment");
+
 for (const t of expectedTools) {
   if (!toolNames.includes(t)) fail(`missing tool: ${t}`);
 }
-ok(`all ${expectedTools.length} tools registered`);
+// The inverse: if a tool is gated off, it must NOT appear.
+if (process.env.PAYPAY_ENABLE_REFUNDS !== "true" && toolNames.includes("refund_payment")) {
+  fail("refund_payment leaked through gating");
+}
+if (process.env.PAYPAY_ENABLE_CANCELS !== "true" && toolNames.includes("cancel_payment")) {
+  fail("cancel_payment leaked through gating");
+}
+ok(`tool surface matches gating (${toolNames.length} tools)`);
 
 // Verify bilingual descriptions (JP chars present)
 const createTool = toolsResp.tools.find((t) => t.name === "create_qr_code");
@@ -59,15 +70,23 @@ if (!createTool?.description || !/[\u3040-\u30ff\u4e00-\u9fff]/.test(createTool.
 }
 ok("create_qr_code description is bilingual (JP chars present)");
 
-// 2. List prompts
+// 2. List prompts — also gated. refund_last_payment needs PAYPAY_ENABLE_REFUNDS.
+// debug_stuck_payment needs PAYPAY_ENABLE_REFUNDS AND PAYPAY_ENABLE_CANCELS.
 const promptsResp = await client.listPrompts();
 const promptNames = promptsResp.prompts.map((p) => p.name).sort();
 console.log(`[e2e] prompts: ${promptNames.join(", ")}`);
-const expectedPrompts = ["accept_single_payment", "debug_stuck_payment", "refund_last_payment"];
+
+const expectedPrompts = ["accept_single_payment"];
+if (process.env.PAYPAY_ENABLE_REFUNDS === "true") {
+  expectedPrompts.push("refund_last_payment");
+  if (process.env.PAYPAY_ENABLE_CANCELS === "true") {
+    expectedPrompts.push("debug_stuck_payment");
+  }
+}
 for (const p of expectedPrompts) {
   if (!promptNames.includes(p)) fail(`missing prompt: ${p}`);
 }
-ok(`all ${expectedPrompts.length} prompts registered`);
+ok(`prompt surface matches gating (${promptNames.length} prompts)`);
 
 // 3. Call create_qr_code against sandbox
 console.log("[e2e] calling create_qr_code…");
