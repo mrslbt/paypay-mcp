@@ -20,7 +20,7 @@ export function buildServer(config: Config): McpServer {
   const server = new McpServer(
     {
       name: "paypay-mcp",
-      version: "0.1.1",
+      version: "0.1.3",
     },
     {
       capabilities: {
