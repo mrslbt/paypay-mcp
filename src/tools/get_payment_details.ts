@@ -26,6 +26,8 @@ export const getPaymentDetailsTool: ToolDefinition<typeof input> = {
     "単発の確認に使用してください。継続的な確認は `wait_for_payment` を推奨します。",
   ].join("\n"),
   inputSchema: input,
+  // Read-only: a single GET, no state change. Safe to call freely.
+  annotations: { readOnlyHint: true, openWorldHint: true },
   async handler(args, client) {
     const res = await client.request<{
       status: string;

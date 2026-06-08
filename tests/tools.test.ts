@@ -57,3 +57,35 @@ describe("tool registry", () => {
     ).toThrow();
   });
 });
+
+describe("tool safety annotations", () => {
+  const byName = (n: string) => tools.find((t) => t.name === n)!;
+
+  it("every tool declares annotations", () => {
+    for (const tool of tools) {
+      expect(tool.annotations, `${tool.name} must declare annotations`).toBeDefined();
+    }
+  });
+
+  it("read-only tools are marked readOnlyHint and never destructive", () => {
+    for (const name of ["get_payment_details", "wait_for_payment"]) {
+      const a = byName(name).annotations;
+      expect(a.readOnlyHint, `${name} should be read-only`).toBe(true);
+      expect(a.destructiveHint, `${name} must not be destructive`).not.toBe(true);
+    }
+  });
+
+  it("money-moving / destructive tools carry destructiveHint and are not read-only", () => {
+    for (const name of ["refund_payment", "cancel_payment", "delete_qr_code"]) {
+      const a = byName(name).annotations;
+      expect(a.destructiveHint, `${name} must be flagged destructive`).toBe(true);
+      expect(a.readOnlyHint, `${name} must not be read-only`).toBe(false);
+    }
+  });
+
+  it("create_qr_code is state-changing but not destructive", () => {
+    const a = byName("create_qr_code").annotations;
+    expect(a.readOnlyHint).toBe(false);
+    expect(a.destructiveHint).toBe(false);
+  });
+});

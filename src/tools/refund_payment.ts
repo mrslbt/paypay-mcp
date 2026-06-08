@@ -51,6 +51,15 @@ export const refundPaymentTool: ToolDefinition<typeof input> = {
     "  (3) マーチャントごとに設定された返金回数上限があります(超過時: REFUND_LIMIT_EXCEEDED)。",
   ].join("\n"),
   inputSchema: input,
+  // MONEY-MOVING and irreversible: returns funds to the customer. Not
+  // idempotent (each refund needs a unique merchantRefundId). Registration is
+  // additionally gated behind PAYPAY_ENABLE_REFUNDS.
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
   async handler(args, client) {
     const merchantRefundId = args.merchant_refund_id ?? randomUUID();
 

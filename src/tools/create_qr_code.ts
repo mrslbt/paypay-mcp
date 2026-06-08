@@ -74,6 +74,15 @@ export const createQrCodeTool: ToolDefinition<typeof input> = {
     "顧客が支払いを完了するまで `wait_for_payment` でポーリングしてください。",
   ].join("\n"),
   inputSchema: input,
+  // Creates a QR code (state-changing) but no funds move until the customer
+  // pays in the PayPay app. Not destructive; not idempotent (a reused
+  // merchantPaymentId for a different order fails).
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
   async handler(args, client) {
     const merchantPaymentId = args.merchant_payment_id ?? randomUUID();
 

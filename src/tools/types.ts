@@ -6,6 +6,7 @@
  * of this MCP's core differentiators.
  */
 
+import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import type { z } from "zod";
 import type { PayPayClient } from "../client.js";
 
@@ -20,6 +21,13 @@ export interface ToolDefinition<TInput extends ToolInputSchema = ToolInputSchema
   description: string;
   /** Input schema validated with Zod before reaching the handler. */
   inputSchema: TInput;
+  /**
+   * Behavioral hints surfaced to MCP clients (per the MCP spec) so they can
+   * warn the user before money-moving or destructive calls. Required on every
+   * tool so a payment server can never silently ship a tool without declaring
+   * its safety profile. Note: all fields are advisory hints, not enforcement.
+   */
+  annotations: ToolAnnotations;
   handler: (input: z.infer<TInput>, client: PayPayClient) => Promise<ToolResult>;
 }
 

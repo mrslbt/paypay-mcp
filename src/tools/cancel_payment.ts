@@ -30,6 +30,15 @@ export const cancelPaymentTool: ToolDefinition<typeof input> = {
     "可能な時間帯: 決済日翌日の午前00:14:59(JST)まで。それ以降は refund_payment を使用してください。",
   ].join("\n"),
   inputSchema: input,
+  // MONEY-MOVING and irreversible: cancels an in-flight payment (PayPay
+  // returns any taken funds to the user). Registration is additionally gated
+  // behind PAYPAY_ENABLE_CANCELS.
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
   async handler(args, client) {
     await client.request({
       method: "DELETE",

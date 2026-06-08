@@ -75,6 +75,15 @@ export const yourNewTool: ToolDefinition<typeof input> = {
     "日本語の説明。LLMがいつ使うべきかを伝える。",
   ].join("\n"),
   inputSchema: input,
+  // REQUIRED: declare the tool's safety profile (see "Safety conventions" §3).
+  // Read-only tool → { readOnlyHint: true, openWorldHint: true }
+  // Money-moving / irreversible → { readOnlyHint: false, destructiveHint: true, openWorldHint: true }
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
   async handler(args, client) {
     const res = await client.request<{ /* response shape */ }>({
       method: "POST",
@@ -126,6 +135,15 @@ If you add another irreversible/destructive tool, follow the same pattern:
 
 `PAYPAY_ENV` defaults to `"sandbox"`. Production base URL is only used when `PAYPAY_ENV=production`. Do NOT remove this default. Do NOT introduce code paths that silently route to production.
 
+**3. Every tool declares its safety profile via `annotations` (required field).**
+
+`ToolDefinition.annotations` is **mandatory** — the compiler will reject a tool that omits it. These are the standard MCP [tool annotations](https://modelcontextprotocol.io/specification) (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`), surfaced to clients so they can warn the user before a money-moving or destructive call. They are *hints*, not enforcement — the real guard is the env-flag gating in §1. Be honest:
+- Pure GET / no state change → `readOnlyHint: true`.
+- Moves money or is irreversible (refund, cancel) or removes a resource (delete) → `destructiveHint: true`, `readOnlyHint: false`.
+- Creates something but moves no funds yet (create_qr_code) → `readOnlyHint: false`, `destructiveHint: false`.
+
+`tests/tools.test.ts` asserts this contract (read-only tools aren't destructive; refund/cancel/delete are). If you add a tool, the test loop covers the "declares annotations" check automatically; add it to the right destructive/read-only list if applicable.
+
 ## Bilingual descriptions are not optional
 
 Every tool description, every Zod field `.describe()`, and every prompt MUST include both English and Japanese text. This is a deliberate product decision — paypay-mcp targets Japanese merchants and English-speaking developers equally. Anglo-only descriptions degrade the Japanese AI agent experience and will be rejected.
@@ -150,7 +168,7 @@ If touching `src/transports/http.ts`:
 - `tests/errors.test.ts` — PayPayError surface
 - `tests/http.test.ts` — HTTP transport auth + CORS
 - `tests/prompts.test.ts` — prompt registry
-- `tests/tools.test.ts` — tool registry + gating behavior
+- `tests/tools.test.ts` — tool registry, gating behavior, and the safety-annotation contract
 - `tests/smoke.mjs` — single tool call against real sandbox (requires real env)
 - `tests/mcp_e2e.mjs` — full MCP protocol round-trip (requires real env)
 

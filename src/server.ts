@@ -12,6 +12,20 @@ import { getPrompts } from "./prompts/index.js";
 import { resources } from "./resources/index.js";
 import { getTools } from "./tools/index.js";
 
+const SERVER_INSTRUCTIONS = [
+  "paypay-mcp — create and manage PayPay (Japan's QR-wallet) payments via the PayPay Open Payment API.",
+  "",
+  "Tool safety profile (also surfaced as MCP tool annotations):",
+  "- get_payment_details, wait_for_payment — READ-ONLY. Safe to call freely.",
+  "- create_qr_code — creates a payment QR. No money moves until the customer pays in the PayPay app.",
+  "- delete_qr_code — destructive: invalidates a created QR code.",
+  "- refund_payment, cancel_payment — MONEY-MOVING and irreversible. They are only registered when the operator sets PAYPAY_ENABLE_REFUNDS / PAYPAY_ENABLE_CANCELS; if you don't see them, they are intentionally disabled. ALWAYS confirm the exact id and amount with the user before calling.",
+  "",
+  "Environment: runs against the PayPay sandbox by default; production requires PAYPAY_ENV=production. Amounts are in JPY (integer yen, no decimals).",
+  "",
+  "Unofficial, community-built. Not affiliated with PayPay Corporation.",
+].join("\n");
+
 export function buildServer(config: Config): McpServer {
   const client = new PayPayClient(config);
   const tools = getTools(config);
@@ -20,7 +34,7 @@ export function buildServer(config: Config): McpServer {
   const server = new McpServer(
     {
       name: "paypay-mcp",
-      version: "0.1.3",
+      version: "0.2.0",
     },
     {
       capabilities: {
@@ -28,6 +42,7 @@ export function buildServer(config: Config): McpServer {
         prompts: {},
         resources: {},
       },
+      instructions: SERVER_INSTRUCTIONS,
     },
   );
 
@@ -38,6 +53,7 @@ export function buildServer(config: Config): McpServer {
         title: tool.title,
         description: tool.description,
         inputSchema: tool.inputSchema.shape,
+        annotations: tool.annotations,
       },
       async (args: unknown) => {
         try {

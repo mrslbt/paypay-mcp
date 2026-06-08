@@ -24,6 +24,14 @@ export const deleteQrCodeTool: ToolDefinition<typeof input> = {
     "注文がキャンセルされた場合や、期限切れのコードを整理する際に使用してください。",
   ].join("\n"),
   inputSchema: input,
+  // Destructive: invalidates a created QR code. Idempotent (deleting an
+  // already-deleted code converges to the same state). No funds move.
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: true,
+    openWorldHint: true,
+  },
   async handler(args, client) {
     await client.request({
       method: "DELETE",

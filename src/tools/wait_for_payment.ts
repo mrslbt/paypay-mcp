@@ -49,6 +49,8 @@ export const waitForPaymentTool: ToolDefinition<typeof input> = {
     "最終ステータスと取引詳細を返します。",
   ].join("\n"),
   inputSchema: input,
+  // Read-only: polls payment status via GET. No state change.
+  annotations: { readOnlyHint: true, openWorldHint: true },
   async handler(args, client) {
     const deadline = Date.now() + args.timeout_seconds * 1000;
     const intervalMs = args.poll_interval_seconds * 1000;

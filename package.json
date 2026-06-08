@@ -1,6 +1,6 @@
 {
   "name": "paypay-mcp",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "mcpName": "io.github.mrslbt/paypay-mcp",
   "description": "MCP server for PayPay (Japan's largest QR wallet). Bilingual (JP/EN) tools for creating QR codes, accepting payments, refunds, and cancellations via the PayPay Open Payment API.",
   "keywords": [

@@ -11,7 +11,7 @@ Works with Claude Desktop, Claude Code, Cursor, Windsurf, Zed, ChatGPT Apps SDK,
 
 ## Status
 
-`v0.1.x` — production-capable, not yet battle-tested at scale.
+`v0.2.x` — production-capable, not yet battle-tested at scale.
 
 The server runs cleanly against PayPay's production Open Payment API once `PAYPAY_ENV=production` is set with approved merchant credentials. It has not yet processed meaningful real-world volume. If you are routing real payments through it, pin the version and review the source first.
 
@@ -155,6 +155,7 @@ This server can move real money through the PayPay OPA API. Key safeguards:
 - **Refund and cancel tools are disabled by default.** `refund_payment` and `cancel_payment` are only registered when `PAYPAY_ENABLE_REFUNDS=true` or `PAYPAY_ENABLE_CANCELS=true`. Only enable them in trusted agent contexts where tool inputs cannot be influenced by untrusted content.
 - **Sandbox is the default.** Production requires an explicit `PAYPAY_ENV=production`, plus completed PayPay merchant onboarding. Always test against sandbox first.
 - **Unique merchantPaymentId and merchantRefundId per call.** PayPay deduplicates by these IDs, so reusing one will either fail or target an older payment. Generate a fresh ID for each new payment or refund.
+- **Tools carry MCP safety annotations.** Read-only tools (`get_payment_details`, `wait_for_payment`) are flagged `readOnlyHint`; money-moving and destructive tools (`refund_payment`, `cancel_payment`, `delete_qr_code`) are flagged `destructiveHint` so compatible clients can warn you before the call. These are advisory hints — the real guard is the gating above.
 
 Even with these gates on, review any money-moving request before approving the tool call. Treat tool inputs derived from model output as untrusted.
 
