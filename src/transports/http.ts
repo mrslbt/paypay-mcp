@@ -11,10 +11,14 @@
  *   - CORS defaults to no cross-origin access. Use MCP_HTTP_ALLOWED_ORIGINS
  *     (comma-separated) to explicitly allow known origins.
  *
+ * Stateless mode: one transport per request, no session state. Any instance
+ * can serve any request, so the server runs behind a plain load balancer —
+ * aligned with the MCP 2026-07-28 stateless core.
+ *
  * Spec: https://modelcontextprotocol.io/specification/server/transports
  */
 
-import { randomUUID, timingSafeEqual } from "node:crypto";
+import { timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { buildServer } from "../server.js";
@@ -29,8 +33,6 @@ export async function runHttp(config: Config): Promise<void> {
     );
   }
 
-  const sessions = new Map<string, StreamableHTTPServerTransport>();
-
   const httpServer = createServer(async (req, res) => {
     const origin = req.headers.origin;
     if (origin && config.httpAllowedOrigins.includes(origin)) {
@@ -43,8 +45,6 @@ export async function runHttp(config: Config): Promise<void> {
       "Access-Control-Allow-Headers",
       "Content-Type, Mcp-Session-Id, Authorization",
     );
-    res.setHeader("Access-Control-Expose-Headers", "Mcp-Session-Id");
-
     if (req.method === "OPTIONS") {
       res.writeHead(204);
       res.end();
@@ -63,32 +63,15 @@ export async function runHttp(config: Config): Promise<void> {
       return;
     }
 
+    // Stateless: one transport + server instance per request, closed after.
+    // Any instance can serve any request — no sticky sessions required.
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+    });
+
     try {
-      const sessionIdHeader = req.headers["mcp-session-id"];
-      const sessionId = Array.isArray(sessionIdHeader) ? sessionIdHeader[0] : sessionIdHeader;
-
-      let transport: StreamableHTTPServerTransport | undefined = sessionId
-        ? sessions.get(sessionId)
-        : undefined;
-
-      if (!transport) {
-        transport = new StreamableHTTPServerTransport({
-          sessionIdGenerator: () => randomUUID(),
-          onsessioninitialized: (id: string) => {
-            sessions.set(id, transport!);
-            logger.info("MCP session opened", { sessionId: id });
-          },
-        });
-        transport.onclose = () => {
-          if (transport!.sessionId) {
-            sessions.delete(transport!.sessionId);
-            logger.info("MCP session closed", { sessionId: transport!.sessionId });
-          }
-        };
-        const server = buildServer(config);
-        await server.connect(transport);
-      }
-
+      const server = buildServer(config);
+      await server.connect(transport);
       const body = await readBody(req);
       await transport.handleRequest(req, res, body);
     } catch (err) {
@@ -98,6 +81,12 @@ export async function runHttp(config: Config): Promise<void> {
       if (!res.headersSent) {
         res.writeHead(500, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ error: "internal_server_error" }));
+      }
+    } finally {
+      try {
+        await transport.close();
+      } catch {
+        // best-effort cleanup
       }
     }
   });
